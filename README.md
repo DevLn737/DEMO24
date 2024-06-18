@@ -5,22 +5,23 @@ HQ-R root root, administrator P@ssw0rd
 HQ-SRV root root administrator P@ssw0rd
 BR-SRV root root administrator P@ssw0rd
 
-Полезное
-Выбор ПО
-![[Pasted image 20240611182334.png]]
-Прежде проверять внутреннею сеть, необходимо не забыть в настройках proxmox или esxi отключить сетевое устройство, с помощью которого создаётся мост между основным компьютером и виртуальной машиной. И наоборот, возвращать обратно интернет, когда будет происходить установку пакета, или удаление репозитория. Но, как же это сделать? Ответ, думайте, ничего сложного, иначе даже первый модуль не сделать.
+Полезное  
+Выбор ПО на роутеры и серваки  
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240611182334.png)  
+Прежде проверять внутреннюю сеть, необходимо не забыть в настройках proxmox или esxi отключить сетевое устройство, с помощью которого создаётся мост между основным компьютером и виртуальной машиной. И наоборот, возвращать обратно интернет, когда будет происходить установку пакета, или удаление репозитория. Но, как же это сделать? Ответ, думайте, ничего сложного, иначе даже первый модуль не сделать.
 
-Посмотреть последние логи
+Посмотреть последние логи  
 ```bash
 journalctl -xe
 ```
 
 Узнать текущий DNS через nmcli
-![[Pasted image 20240617192439.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240617192439.png)
 
-Список используемых пакетов на машинах
-network-manager frr dnsmasq iperf3 isc-dhcp-server
-hq-r network-manager frr iperf3 isc-dhcp-server 
+Список используемых пакетов на машинах (*Неполный*)  
+network-manager frr dnsmasq iperf3 isc-dhcp-server  
+hq-r network-manager frr iperf3 isc-dhcp-server   
+
 ### Модуль 1: Выполнение работ по проектированию сетевой инфраструктуры
 ---
 #### Задание 1 - базовая настройка всех устройств
@@ -42,7 +43,7 @@ hq-r network-manager frr iperf3 isc-dhcp-server
 | BR-SRV         |           | 192.168.2.10           |                    |          |                 |
 
 
-Написать формулы для рассчёта
+Формулы для рассчёта, их пока что нет.
 
 Для того, чтобы присвоить имя хоста необходимо написать
 ```bash
@@ -51,7 +52,7 @@ hostnamectl set-hostname <имя хоста>
 hostnamectl set-hostname HQ-R
 ```
 
-Команды
+Команды  
 Обновляем и устанавливаем пакеты на каждом устройстве
 ```bash
 apt update && apt -y dist-upgrade
@@ -63,53 +64,52 @@ apt install -y network-manager
 echo net.ipv4.ip_forward=1 >> /etc/systcl.conf
 ```
 
-Настроить интерфейсы по карте
-здесь картинки из nmtui
+Настроить интерфейсы по карте  
 
 после настройки прописать 
 ```bash
 systemctl restart NetworkManager
 ```
 
-Если не включаются интерфейсы из за ошибки device is strictly unmanaged
-Необходимо проверить файл /etc/network/interfaces
+Если не включаются интерфейсы из за ошибки device is strictly unmanaged  
+Необходимо проверить файл /etc/network/interfaces  
 ```bash
 nano /etc/network/interfaces
 ```
-И закомментируйте строчки поставив перед ними символ #
+И закомментируйте строчки поставив перед ними символ #  
 ```
 #allow-hotplug ens18
 #TYT ECHE STROCHKA NO IA YDALIL NECHAINO
 ```
 
 
-проверить работу можно пинганув с ISP роутеры
+Проверить работу, можно пинганув с ISP роутеры  
 ```
 ping 10.0.0.2
 ping 11.0.0.2
 ```
-Если пинги прошли без проблем, значит всё ок
+Если пинги прошли без проблем, значит всё ок  
 
 nmcli у HQ-R
-![[Pasted image 20240611200435.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240611200435.png)
 
 nmcli у BR-R
-![[Pasted image 20240611200536.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240611200536.png)
 
 nmcli у ISP
-![[Pasted image 20240611200610.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240611200610.png)
 
 #### Задание 2 - Настройка внутренней динамической маршрутизации 
 ##### Настройка GRE туннеля
 Настройки nmtui на HQ-R
-Для этого необходимо прописать воспользоваться `nmtui`
-Дальше выбрать add, а тип соединения ip tunnel, третий снизу
+Для этого необходимо воспользоваться `nmtui`  
+Дальше выбрать add, а тип соединения ip tunnel, третий снизу  
 
-![[Pasted image 20240612122448.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612122448.png)
 
 
 Настройки nmtui на BR-R
-![[Pasted image 20240612122806.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612122806.png)
 
 Проверить можно пинганув c HQ-R роутера BR-R роутер
 ```bash
@@ -129,10 +129,12 @@ ping 100.0.0.1
 - Хорошо масштабируется в больших корпоративных сетях.
 - Иерархическая структура (разделение на области).
 - Быстрая конвергенция.
+
 **BGP (Border Gateway Protocol)**:
 - Используется преимущественно для меж доменной маршрутизации (между автономными системами).
 - Масштабируемый и гибкий.
 - Медленная конвергенция по сравнению с OSPF.
+
 Для данной задачи предпочтительнее использовать **OSPF**, так как он лучше подходит для внутренней маршрутизации и обеспечит лучшую масштабируемость и быструю конвергенцию в будущем.
 
 ##### Установка и настройка FRR для OSPF
@@ -195,7 +197,7 @@ host server {
 ```
 
 Чтобы узнать hardware ethernet, то есть mac адрес порта сервера. Необходимо перейти на HQ-SRV в nmtui, выбрать соединения и в поле device будет указан mac адрес
-![[Pasted image 20240612093216.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612093216.png)
 
 - `subnet 192.168.1.0 netmask 255.255.255.0` определяет сеть и маску подсети.
 - `range 192.168.1.100 192.168.1.200` определяет диапазон адресов для выделения.
@@ -325,10 +327,10 @@ iperf3 -c 10.0.0.1
 ```
 
 **Скриншот HQ-R**
-![[Pasted image 20240612105116.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612105116.png)
 
 **Скриншот ISP**
-![[Pasted image 20240612105407.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612105407.png)
 
 #### Задание 6 - Составьте backup скрипты для сохранения конфигурации сетевых устройств
 
@@ -345,18 +347,14 @@ backup-script.sh
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-echo "Start copy network settings"
 mkdir -p /var/backup/$TIMESTAMP
 cp -r /etc/frr /var/backup/$TIMESTAMP
 cp -r /etc/NetworkManager/system-connections /var/backup/$TIMESTAMP
 cp -r /etc/dhcp /var/backup/$TIMESTAMP
-echo "Network settings successfully copied"
 
-echo "Starting create arhcive!"
 cd /var/backup
 tar czfv "./$TIMESTAMP.tar.gz" ./$TIMESTAMP
 rm -r /var/backup/$TIMESTAMP
-echo "Archive is created!"
 
 echo "$TIMESTAMP: Backup was successfully done!"
 ```
@@ -368,10 +366,10 @@ chmod +x /var/backup/backup-script.sh
 ```
 
 **Пример успешного выполнения скрипта**
-![[Pasted image 20240612112050.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612112050.png)
 
 
-#### Задание 7 - одключение по SSH для удалённого конфигурирования устройства HQ-SRV
+#### Задание 7 - Подключение по SSH для удалённого конфигурирования устройства HQ-SRV
 
 Заходим в настройки sshd
 
@@ -410,7 +408,7 @@ iptables -L -v -n
 ```
 
 Вывод
-![[Pasted image 20240612192646.png]]
+![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612192646.png)
 
 #### Задание 8 - Настройте контроль доступа до HQ-SRV по SSH со всех устройств, кроме CLI
 
@@ -421,7 +419,7 @@ iptables -A INPUT -p tcp --dport -j ACCEPT
 mkdir /etc/iptables
 sh -c "iptables-save > /etc/iptables/rules.v4"
 ```
-где `9.0.0.1` ip адрес CLI
+где `9.0.0.1` ip адрес CLI, в текущем случае указан интерфейс ISP, а не CLI, потому что не сделал CLI к этому моменту(что является ошибкой)
 
 Проверить правила
 ```bash
@@ -626,23 +624,5 @@ docker compose -f wiki.yml up -d
 docker compose -f wiki.yml down
 ```
 Вики должна заработать в минимальном состоянии по адресу: http://localhost:8080
-
-
-
-
-#### **Сделать**
-модуль 2
-задание 2 хз
-задание 4 100
-задание 5 50
-задание 6 100
-модуль 3
-задание 1 хз
-задание 2 хз
-задание 3 100
-задание 4 50
-задание 5 20
-задание 7 хз
-задание 8 хз
 
 
