@@ -540,15 +540,19 @@ ntpq -p
 apt install samba
 ```
 
-
+=(
 
 Задание 5
 
+=(
 #### Задание 6 - Запустите сервис MediaWiki используя docker на сервере HQ-SRV
+
 docker-compose wiki
 Создаём тома 
+```bash
 docker volume create dbvolume
 docker volume create images
+```
 
 Создаём wiki.yml с содержанием
 ```yaml
@@ -580,6 +584,7 @@ volumes:
   dbvolume:
   images:
 ```
+И в той же директории файл конфига
 LocalSettings.php
 ```php
 <?php
