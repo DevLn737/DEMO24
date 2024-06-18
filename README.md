@@ -347,18 +347,14 @@ backup-script.sh
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-echo "Start copy network settings"
 mkdir -p /var/backup/$TIMESTAMP
 cp -r /etc/frr /var/backup/$TIMESTAMP
 cp -r /etc/NetworkManager/system-connections /var/backup/$TIMESTAMP
 cp -r /etc/dhcp /var/backup/$TIMESTAMP
-echo "Network settings successfully copied"
 
-echo "Starting create arhcive!"
 cd /var/backup
 tar czfv "./$TIMESTAMP.tar.gz" ./$TIMESTAMP
 rm -r /var/backup/$TIMESTAMP
-echo "Archive is created!"
 
 echo "$TIMESTAMP: Backup was successfully done!"
 ```
@@ -373,7 +369,7 @@ chmod +x /var/backup/backup-script.sh
 ![](https://github.com/DevLn737/DEMO24/blob/main/%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F/Pasted%20image%2020240612112050.png)
 
 
-#### Задание 7 - одключение по SSH для удалённого конфигурирования устройства HQ-SRV
+#### Задание 7 - Подключение по SSH для удалённого конфигурирования устройства HQ-SRV
 
 Заходим в настройки sshd
 
@@ -423,7 +419,7 @@ iptables -A INPUT -p tcp --dport -j ACCEPT
 mkdir /etc/iptables
 sh -c "iptables-save > /etc/iptables/rules.v4"
 ```
-где `9.0.0.1` ip адрес CLI
+где `9.0.0.1` ip адрес CLI, в текущем случае указан интерфейс ISP, а не CLI, потому что не сделал CLI к этому моменту(что является ошибкой)
 
 Проверить правила
 ```bash
